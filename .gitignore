@@ -1,0 +1,11 @@
+# Compiled output
+/build/
+
+# Old Makefile output
+/bin/
+
+# VSCode workspace files
+/.vscode/
+
+# Object files
+*.o
