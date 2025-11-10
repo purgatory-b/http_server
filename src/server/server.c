@@ -101,9 +101,7 @@ void get_ram_info_body(char *body_buffer, size_t max_len) {
     fclose(fp);
 }
 
-/**
- * 執行 'date' 命令並組合回應
- */
+
 /**
  * 執行 'date' 命令並組合回應 (已指定時區)
  */
@@ -154,7 +152,7 @@ void get_disk_usage_body(char *body_buffer, size_t max_len) {
 }
 
 /**
- * 讀取 uname -a 並組合回應 (你的舊功能)
+ * 讀取 uname -a 並組合回應
  */
 void get_sys_info_body(char *body_buffer, size_t max_len) {
     FILE *fp = popen("uname -a", "r");
@@ -169,8 +167,7 @@ void get_sys_info_body(char *body_buffer, size_t max_len) {
 }
 
 /**
- * 處理 HTTP 連線 (已升級)
- * 替換了你舊的 handle_connection
+ * 處理 HTTP 連線
  */
 void handle_http_connection(int connfd, struct sockaddr_in client_addr) {
     char buf[MAX_BUFFER];
@@ -193,10 +190,9 @@ void handle_http_connection(int connfd, struct sockaddr_in client_addr) {
     sscanf(buf, "%s %s %s", method, uri, version);
     log_msg(2, "PID %d: Received Request: %s %s %s\n", pid, method, uri, version);
 
-    // 3. (可選) 讀取並丟棄所有剩餘的 HTTP 標頭，直到空行
     while(readline_line(connfd, buf, MAX_BUFFER) > 0) {
         if (strcmp(buf, "\r\n") == 0) {
-            break; // 標頭結束
+            break; 
         }
     }
 
@@ -204,13 +200,11 @@ void handle_http_connection(int connfd, struct sockaddr_in client_addr) {
     char response_body[MAX_BUFFER];
     
     if (strcmp(uri, "/raminfo") == 0) {
-        // --- 呼叫你的舊功能 ---
         get_ram_info_body(response_body, MAX_BUFFER);
         send_http_response(connfd, "200 OK", "text/plain", response_body);
         log_msg(1, "PID %d: Sent RAM info to %s:%d\n", pid, client_ip, client_port);
 
     } else if (strcmp(uri, "/sysinfo") == 0) {
-        // --- 呼叫你的舊功能 ---
         get_sys_info_body(response_body, MAX_BUFFER);
         send_http_response(connfd, "200 OK", "text/plain", response_body);
         log_msg(1, "PID %d: Sent SYS info to %s:%d\n", pid, client_ip, client_port);
@@ -238,10 +232,6 @@ void handle_http_connection(int connfd, struct sockaddr_in client_addr) {
     }
 }
 
-
-/**
- * 你的 main 函式 (保持了所有的健全性機制)
- */
 int main() {
     int listenfd, connfd;
     struct sockaddr_in servaddr, client_addr;
@@ -322,22 +312,19 @@ int main() {
             continue;
         }
 
-        // --- 你的 `fork()` 模型保持不變 ---
         if ((child_pid = fork()) < 0) {
             log_msg(0, "fork error: %s\n", strerror(errno));
             close(connfd);
         } 
         else if (child_pid == 0) {
-            // --- 子程序 ---
             log_msg(2, "Child process %d created.\n", getpid());
             close(listenfd);
-            handle_http_connection(connfd, client_addr); // 呼叫新的 HTTP handler
+            handle_http_connection(connfd, client_addr);
             close(connfd);
             log_msg(2, "Child process %d finished.\n", getpid());
             exit(0);
         } 
         else {
-            // --- 父程序 ---
             close(connfd); 
         }
     }
