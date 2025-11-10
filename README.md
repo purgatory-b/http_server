@@ -39,7 +39,6 @@
   * `GET /loadavg`：回傳 `/proc/loadavg` 的系統負載。
   * `GET /time`：回傳 `Asia/Taipei` 的目前時間。
   * `GET /diskusage`：回傳 `df -h /` 的磁碟使用狀況。
-  * `GET /crashme`：一個用於測試健全性的 API，會觸發 `SIGSEGV`。
 
 ## 專案結構 (Project Structure)
 
